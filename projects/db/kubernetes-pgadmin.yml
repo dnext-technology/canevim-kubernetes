@@ -23,7 +23,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 500
+    - port: 80
       targetPort: 80
   selector:
     app: pgadmin
