@@ -1,0 +1,64 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: mp-location
+  labels:
+    name: mp-location
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: mp-location
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mp-location
+  annotations:
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/pollSchedule: "@every 10m"
+spec:
+  selector:
+    matchLabels:
+      app: mp-location
+  replicas: 1
+  revisionHistoryLimit: 1
+  template:
+    metadata:
+      labels:
+        app: mp-location
+    spec:
+      imagePullSecrets:
+        - name: gitlab-auth
+      restartPolicy: Always
+      containers:
+        - name: mp-location
+          image: registry.gitlab.com/zorgundostu/mp-location-service:arm64
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-configmap
+                  key: host
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-configmap
+                  key: name
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: postgres_user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: postgres_password
