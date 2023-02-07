@@ -23,7 +23,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 80
+    - port: 500
   selector:
     app: pgadmin
 
@@ -59,7 +59,7 @@ spec:
                   key: pgadmin-password
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 500
               protocol: TCP
             - name: https
               containerPort: 443
@@ -90,6 +90,5 @@ metadata:
 type: Opaque
 data:
   pgadmin-password: "demo" # kisphp
-  
   
   
