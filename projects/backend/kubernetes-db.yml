@@ -86,7 +86,7 @@ metadata:
   name: backend-configmap
 data:
   host: zorgundostu-db
-  name: landing
+  name: zorgundostu
 
 ---
 apiVersion: v1
