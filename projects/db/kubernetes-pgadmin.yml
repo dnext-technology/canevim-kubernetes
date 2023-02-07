@@ -24,6 +24,7 @@ spec:
   type: NodePort
   ports:
     - port: 500
+      targetPort: 80
   selector:
     app: pgadmin
 
@@ -59,7 +60,7 @@ spec:
                   key: pgadmin-password
           ports:
             - name: http
-              containerPort: 500
+              containerPort: 80
               protocol: TCP
             - name: https
               containerPort: 443
