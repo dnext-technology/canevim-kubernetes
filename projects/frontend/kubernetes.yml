@@ -1,0 +1,44 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: frontend
+  labels:
+    name: frontend
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: frontend
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  annotations:
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/pollSchedule: "@every 10m"
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  replicas: 1
+  revisionHistoryLimit: 1
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      imagePullSecrets:
+        - name: gitlab-auth
+      restartPolicy: Always
+      containers:
+        - name: frontend
+          image: registry.gitlab.com/zorgundostu/frontend:arm64
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+
