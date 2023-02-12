@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: zorgundostu-db-dev
+  name: zgd-db-dev
   labels:
-    app: zorgundostu-db-dev
+    app: zgd-db-dev
     tier: database
 spec:
   ports:
     - port: 5432
   selector:
-    app: zorgundostu-db-dev
+    app: zgd-db-dev
     tier: database
   clusterIP: None
 
@@ -17,24 +17,24 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: zorgundostu-db-dev
+  name: zgd-db-dev
   labels:
-    app: zorgundostu-db-dev
+    app: zgd-db-dev
     tier: database
 spec:
   selector:
     matchLabels:
-      app: zorgundostu-db-dev
+      app: zgd-db-dev
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: zorgundostu-db-dev
+        app: zgd-db-dev
         tier: database
     spec:
       containers:
-        - name: zorgundostu-db-dev
+        - name: zgd-db-dev
           image: postgres:14
           imagePullPolicy: "IfNotPresent"
           env:
@@ -55,7 +55,7 @@ spec:
                   key: name
           ports:
             - containerPort: 5432
-              name: zorgundostu-db-dev
+              name: zgd-db-dev
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: zgd-persistance-storage-dev
@@ -70,7 +70,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: zgd-pv-claim-dev
   labels:
-    app: zorgundostu-db-dev
+    app: zgd-db-dev
     tier: database
 spec:
   accessModes:
@@ -85,8 +85,8 @@ kind: ConfigMap
 metadata:
   name: backend-configmap-dev
 data:
-  host: zorgundostu-db-dev
-  name: zorgundostu-dev
+  host: zgd-db-dev
+  name: zgd-dev
 
 ---
 apiVersion: v1
