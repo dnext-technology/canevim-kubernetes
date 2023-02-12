@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zorgundostu-db-dev
+  labels:
+    app: zorgundostu-db-dev
+    tier: database
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: zorgundostu-db-dev
+    tier: database
+  clusterIP: None
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zorgundostu-db-dev
+  labels:
+    app: zorgundostu-db-dev
+    tier: database
+spec:
+  selector:
+    matchLabels:
+      app: zorgundostu-db-dev
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: zorgundostu-db-dev
+        tier: database
+    spec:
+      containers:
+        - name: zorgundostu-db-dev
+          image: postgres:14
+          imagePullPolicy: "IfNotPresent"
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret-dev
+                  key: postgres_user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret-dev
+                  key: postgres_password
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-configmap-dev
+                  key: name
+          ports:
+            - containerPort: 5432
+              name: zorgundostu-db-dev
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: zgd-persistance-storage-dev
+      volumes:
+        - name: zgd-persistance-storage-dev
+          persistentVolumeClaim:
+            claimName: zgd-pv-claim-dev
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zgd-pv-claim-dev
+  labels:
+    app: zorgundostu-db-dev
+    tier: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 25Gi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-configmap-dev
+data:
+  host: zorgundostu-db-dev
+  name: zorgundostu-dev
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-secret-dev
+data:
+  postgres_user: cG9zdGdyZXM=
+  postgres_password: cG9zdGdyZXM=
