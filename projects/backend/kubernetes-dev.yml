@@ -1,0 +1,64 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: backend-dev
+  labels:
+    name: backend-dev
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: backend-dev
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-dev
+  annotations:
+    keel.sh/policy: force
+    keel.sh/trigger: poll
+    keel.sh/pollSchedule: "@every 10m"
+spec:
+  selector:
+    matchLabels:
+      app: backend-dev
+  replicas: 1
+  revisionHistoryLimit: 1
+  template:
+    metadata:
+      labels:
+        app: backend-dev
+    spec:
+      imagePullSecrets:
+        - name: gitlab-auth
+      restartPolicy: Always
+      containers:
+        - name: backend-dev
+          image: registry.gitlab.com/zorgundostu/backend:arm64-dev
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-configmap-dev
+                  key: host
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-configmap-dev
+                  key: name
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret-dev
+                  key: postgres_user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret-dev
+                  key: postgres_password
